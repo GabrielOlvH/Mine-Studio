@@ -14,7 +14,7 @@ import kotlin.math.pow
 class MSSoundInstance(
     val instruction: DefaultedList<MSPlayable> = DefaultedList.ofSize(100, MSNote.EMPTY),
     var tempo: Int = 0,
-    var current: Int = 0
+    var current: Int = -1
 ) : AbstractSoundInstance(null as Identifier?, SoundCategory.MUSIC), TickableSoundInstance, NBTSerializable {
 
     override fun getId(): Identifier = (instruction[current++] as? MSNote)?.soundId ?: SoundManager.MISSING_SOUND.identifier

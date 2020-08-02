@@ -4,24 +4,20 @@ import me.steven.minestudio.audio.MSSoundInstance;
 import me.steven.minestudio.items.MSDiscItem;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.JukeboxBlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.sound.PositionedSoundInstance;
-import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.MusicDiscItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 @Mixin(WorldRenderer.class)
@@ -30,35 +26,43 @@ public abstract class MixinWorldRenderer {
     @Shadow
     private ClientWorld world;
 
-    @Shadow
-    @Final
-    private Map<BlockPos, SoundInstance> playingSongs;
+    private final Map<BlockPos, MSSoundInstance> minestudio_playing = new HashMap<>();
 
-    @Shadow
-    @Final
-    private MinecraftClient client;
-
-    @Shadow
-    protected abstract void updateEntitiesForSong(World world, BlockPos pos, boolean playing);
+    @Inject(method = "tick", at = @At("TAIL"))
+    private void minestudio_playCustomDisc(CallbackInfo ci) {
+        Iterator<Map.Entry<BlockPos, MSSoundInstance>> it = minestudio_playing.entrySet().iterator();
+        it.forEachRemaining(entry -> {
+            MSSoundInstance instance = entry.getValue();
+            BlockPos pos = entry.getKey();
+            instance.tick();
+            if (instance.shouldPlay())
+                instance.play(pos, world);
+            if (instance.isDone())
+                it.remove();
+        });
+    }
 
     @Inject(method = "processWorldEvent", at = @At("HEAD"), cancellable = true)
     private void minestudio_handleCustomDisc(PlayerEntity source, int eventId, BlockPos pos, int data, CallbackInfo ci) {
         if (eventId != 1010) return;
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof JukeboxBlockEntity) {
+            minestudio_playing.remove(pos);
             JukeboxBlockEntity jukebox = (JukeboxBlockEntity) blockEntity;
-            if (!MSDiscItem.Companion.isEmpty(jukebox.getRecord())) {
-                MSSoundInstance instance = new MSSoundInstance();
-                CompoundTag tag = jukebox.getRecord().getTag();
+            ItemStack record = jukebox.getRecord();
+            if (!MSDiscItem.Companion.isEmpty(record)) {
+                CompoundTag tag = record.getTag();
                 if (tag == null) return;
+                MSSoundInstance instance = new MSSoundInstance();
                 instance.fromTag(tag);
-                playMSDisc(instance, pos);
+                minestudio_playing.put(pos, instance);
+                //playMSDisc(instance, pos);
                 ci.cancel();
             }
         }
     }
 
-    private void playMSDisc(MSSoundInstance soundInstance, BlockPos songPosition) {
+    /*private void playMSDisc(MSSoundInstance soundInstance, BlockPos songPosition) {
         SoundInstance current = this.playingSongs.get(songPosition);
         if (current != null) {
             this.client.getSoundManager().stop(current);
@@ -73,5 +77,5 @@ public abstract class MixinWorldRenderer {
         this.client.getSoundManager().play(soundInstance);
 
         this.updateEntitiesForSong(this.world, songPosition, true);
-    }
+    }*/
 }

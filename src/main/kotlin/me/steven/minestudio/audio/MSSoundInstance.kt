@@ -1,64 +1,96 @@
 package me.steven.minestudio.audio
 
 import me.steven.minestudio.utils.NBTSerializable
-import net.minecraft.client.sound.AbstractSoundInstance
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.client.sound.SoundManager
-import net.minecraft.client.sound.TickableSoundInstance
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.registry.Registry
 import kotlin.math.pow
 
-class MSSoundInstance(
-    val instruction: DefaultedList<MSPlayable> = DefaultedList.ofSize(100, MSNote.EMPTY),
-    var tempo: Int = 0,
-    var current: Int = -1
-) : AbstractSoundInstance(null as Identifier?, SoundCategory.MUSIC), TickableSoundInstance, NBTSerializable {
+class MSSoundInstance : NBTSerializable {
 
-    override fun getId(): Identifier = (instruction[current++] as? MSNote)?.soundId ?: SoundManager.MISSING_SOUND.identifier
+    val instruction: DefaultedList<MSNoteLayer> = DefaultedList.ofSize(100, MSNoteLayer())
+    var delay: Int = 0
+    private var currentDelay = 0
+    private var previousSoundId: Identifier? = null
+    private var soundId: Identifier = SoundManager.MISSING_SOUND.identifier
+    private var currentIndex: Int = 0
+    private var iterator: Iterator<MSPlayable>? = null
+    private var current: MSPlayable? = null
 
-    override fun getPitch(): Float {
-        val note = instruction[current]
-        if (note == MSNote.EMPTY) return super.getPitch()
-        val n = (note as MSNote).note
+    @Environment(EnvType.CLIENT)
+    fun play(pos: BlockPos, world: ClientWorld) {
+        val sound = Registry.SOUND_EVENT.get(soundId)
+        world.playSound(pos, sound, SoundCategory.MUSIC, getVolume(), getPitch(), true)
+        previousSoundId = soundId
+    }
+
+    fun getId(): Identifier {
+        if (iterator?.hasNext() == true) {
+            previousSoundId = soundId
+            current = iterator?.next()
+            soundId = (current as? MSNote)?.soundId ?: SoundManager.MISSING_SOUND.identifier
+            return soundId
+        }
+        iterator = instruction[currentIndex].notes.iterator()
+        return getId()
+    }
+
+    fun getPitch(): Float {
+        if (current?.isEmpty() == true) return 1f
+        val n = (current as? MSNote)?.note ?: return 1f
         return 2.0.pow((n - 12) / 12.0).toFloat()
     }
 
-    override fun getVolume(): Float = (instruction[current] as? MSNote)?.volume ?: super.getVolume()
+    fun getVolume(): Float = (current as? MSNote)?.volume ?: 1f
 
-    override fun isRepeatable(): Boolean = true
+    fun isDone(): Boolean = currentIndex >= instruction.size
 
-    override fun getRepeatDelay(): Int = tempo
+    fun tick() {
+        currentDelay++
+        if (currentDelay >= delay) {
+            currentDelay = 0
+            currentIndex++
+            getId()
+        }
+    }
 
-    override fun isDone(): Boolean = current >= instruction.size
-
-    override fun tick() {}
+    fun shouldPlay(): Boolean = previousSoundId != soundId
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         val instruct = CompoundTag()
-        val notes = ListTag()
-        instruction.forEachIndexed { index, playable ->
+        val layers = ListTag()
+        instruction.forEachIndexed { index, layer ->
             val noteTag = CompoundTag()
             noteTag.putInt("index", index)
-            notes.add(playable.toTag(noteTag))
+            layers.add(layer.toTag(noteTag))
         }
-        instruct.put("notes", notes)
-        instruct.putInt("tempo", tempo)
-        instruct.putInt("current", current)
+        instruct.put("layers", layers)
+        instruct.putInt("tempo", delay)
+        //instruct.putInt("current", currentIndex)
         tag.put("minestudio", instruct)
         return tag
     }
 
     override fun fromTag(tag: CompoundTag) {
         val instruct = tag.getCompound("minestudio")
-        val notes = instruct.getList("notes", 10)
-        notes.forEach { noteTag ->
-            val index = (noteTag as CompoundTag).getInt("index")
-            instruction[index] = MSPlayable.fromTag(noteTag)
+        val layers = instruct.getList("layers", 10)
+        layers.forEach { layerTag ->
+            val index = (layerTag as CompoundTag).getInt("index")
+            val layer = MSNoteLayer()
+            layer.fromTag(layerTag)
+            instruction[index] = layer
         }
-        tempo = instruct.getInt("tempo")
-        current = instruct.getInt("current")
+        delay = instruct.getInt("tempo")
+        //currentIndex = instruct.getInt("current")
     }
+
+    override fun toString(): String = "SoundInstance[$soundId]"
 }

@@ -20,7 +20,7 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "me.steven.minestudio.MineStudioKt"
+        "value": "me.steven.minestudio.MineStudio"
       }
     ]
   },

@@ -11,15 +11,15 @@ data class MSNote(
 ) : NBTSerializable, MSPlayable {
 
     override fun fromTag(tag: CompoundTag) {
-        soundId = Identifier(tag.getString("0"))
-        note = tag.getInt("1")
-        volume = tag.getFloat("2")
+        soundId = Identifier(tag.getString("soundId"))
+        note = tag.getInt("note")
+        volume = tag.getFloat("volume")
     }
 
     override fun toTag(tag: CompoundTag): CompoundTag {
-        tag.putString("0", soundId.toString())
-        tag.putInt("1", note)
-        tag.putFloat("2", volume)
+        tag.putString("soundId", soundId.toString())
+        tag.putInt("note", note)
+        tag.putFloat("volume", volume)
         return tag
     }
 

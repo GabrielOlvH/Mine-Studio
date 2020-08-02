@@ -1,5 +1,6 @@
 package me.steven.minestudio
 
+import me.steven.minestudio.items.MSDiscItem
 import me.steven.minestudio.utils.identifier
 import me.steven.minestudio.utils.item
 import me.steven.minestudio.utils.itemSettings
@@ -18,5 +19,5 @@ object MineStudio : ModInitializer {
         FabricItemGroupBuilder.create(identifier("minestudio_group")).icon { ItemStack(EMPTY_DISC) }.build()
     const val MOD_ID = "minestudio"
 
-    val EMPTY_DISC: Item = Item(itemSettings())
+    val EMPTY_DISC: Item = MSDiscItem(itemSettings())
 }

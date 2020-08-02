@@ -1,5 +1,6 @@
-package me.steven.minestudio
+package me.steven.minestudio.utils
 
+import me.steven.minestudio.MineStudio
 import net.minecraft.block.Block
 import net.minecraft.item.Item
 import net.minecraft.util.Identifier
@@ -16,3 +17,5 @@ fun Identifier.block(block: Block): Identifier {
     Registry.register(Registry.BLOCK, this, block)
     return this
 }
+
+fun itemSettings() = Item.Settings().group(MineStudio.MOD_GROUP)

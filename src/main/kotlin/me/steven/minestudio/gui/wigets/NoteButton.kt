@@ -34,10 +34,10 @@ class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WB
     }
 
     override fun onMouseScroll(x: Int, y: Int, amount: Double) {
-        if (note >= 24) note = 0
-        else if (note <= 0) note = 24
         if (amount > 0) note++
         else note--
+        if (note >= 24) note = 0
+        else if (note <= 0) note = 24
         super.onMouseScroll(x, y, amount)
     }
 

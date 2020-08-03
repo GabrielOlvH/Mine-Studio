@@ -16,7 +16,7 @@ import kotlin.math.pow
 
 class MSSoundInstance : NBTSerializable {
 
-    val instruction: DefaultedList<MSNoteLayer> = DefaultedList.ofSize(100, MSNoteLayer())
+    val instruction: DefaultedList<MSNoteLayer> = DefaultedList.ofSize(50, MSNoteLayer())
     var delay: Int = 0
     var played = false
     private var currentDelay = 0

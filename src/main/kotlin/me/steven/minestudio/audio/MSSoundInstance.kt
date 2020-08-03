@@ -1,12 +1,10 @@
 package me.steven.minestudio.audio
 
 import me.steven.minestudio.utils.NBTSerializable
-import net.fabricmc.api.EnvType
-import net.fabricmc.api.Environment
 import net.minecraft.client.sound.SoundManager
-import net.minecraft.client.world.ClientWorld
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
@@ -19,50 +17,33 @@ class MSSoundInstance : NBTSerializable {
     val instruction: DefaultedList<MSNoteLayer> = DefaultedList.ofSize(100, MSNoteLayer())
     var delay: Int = 0
     private var currentDelay = 0
-    private var previousSoundId: Identifier? = null
+    private var played = false
     private var soundId: Identifier = SoundManager.MISSING_SOUND.identifier
     private var currentIndex: Int = 0
     private var iterator: Iterator<MSPlayable>? = null
-    private var current: MSPlayable? = null
 
-    @Environment(EnvType.CLIENT)
-    fun play(pos: BlockPos, world: ClientWorld) {
-        val sound = Registry.SOUND_EVENT.get(soundId)
-        world.playSound(pos, sound, SoundCategory.MUSIC, getVolume(), getPitch(), true)
-        previousSoundId = soundId
-    }
-
-    fun getId(): Identifier {
-        if (iterator?.hasNext() == true) {
-            previousSoundId = soundId
-            current = iterator?.next()
-            soundId = (current as? MSNote)?.soundId ?: SoundManager.MISSING_SOUND.identifier
-            return soundId
+    fun play(pos: BlockPos, world: ServerWorld) {
+        while (iterator?.hasNext() ?: return) {
+            val next = iterator!!.next() as? MSNote ?: continue
+            val sound = Registry.SOUND_EVENT.get(next.soundId)
+            val pitch = 2.0.pow((next.note - 12) / 12.0).toFloat()
+            world.playSound(null, pos, sound, SoundCategory.MUSIC, next.volume, pitch)
         }
-        iterator = instruction[currentIndex].notes.iterator()
-        return getId()
+        played = true
     }
-
-    fun getPitch(): Float {
-        if (current?.isEmpty() == true) return 1f
-        val n = (current as? MSNote)?.note ?: return 1f
-        return 2.0.pow((n - 12) / 12.0).toFloat()
-    }
-
-    fun getVolume(): Float = (current as? MSNote)?.volume ?: 1f
-
     fun isDone(): Boolean = currentIndex >= instruction.size
 
     fun tick() {
         currentDelay++
         if (currentDelay >= delay) {
             currentDelay = 0
-            currentIndex++
-            getId()
+            val notes = instruction[currentIndex++].notes
+            iterator = notes.iterator()
+            played = false
         }
     }
 
-    fun shouldPlay(): Boolean = previousSoundId != soundId
+    fun shouldPlay(): Boolean = !played
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         val instruct = CompoundTag()

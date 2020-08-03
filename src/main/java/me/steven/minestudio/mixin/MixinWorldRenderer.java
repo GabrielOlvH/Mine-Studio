@@ -1,5 +1,6 @@
 package me.steven.minestudio.mixin;
 
+import me.steven.minestudio.MineStudio;
 import me.steven.minestudio.audio.MSSoundInstance;
 import me.steven.minestudio.items.MSDiscItem;
 import net.minecraft.block.entity.BlockEntity;
@@ -16,38 +17,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 @Mixin(WorldRenderer.class)
 public abstract class MixinWorldRenderer {
 
     @Shadow
     private ClientWorld world;
 
-    private final Map<BlockPos, MSSoundInstance> minestudio_playing = new HashMap<>();
-
-    @Inject(method = "tick", at = @At("TAIL"))
-    private void minestudio_playCustomDisc(CallbackInfo ci) {
-        Iterator<Map.Entry<BlockPos, MSSoundInstance>> it = minestudio_playing.entrySet().iterator();
-        it.forEachRemaining(entry -> {
-            MSSoundInstance instance = entry.getValue();
-            BlockPos pos = entry.getKey();
-            instance.tick();
-            if (instance.shouldPlay())
-                instance.play(pos, world);
-            if (instance.isDone())
-                it.remove();
-        });
-    }
-
     @Inject(method = "processWorldEvent", at = @At("HEAD"), cancellable = true)
     private void minestudio_handleCustomDisc(PlayerEntity source, int eventId, BlockPos pos, int data, CallbackInfo ci) {
         if (eventId != 1010) return;
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof JukeboxBlockEntity) {
-            minestudio_playing.remove(pos);
+            MineStudio.INSTANCE.getPLAYING_AUDIOS().remove(pos);
             JukeboxBlockEntity jukebox = (JukeboxBlockEntity) blockEntity;
             ItemStack record = jukebox.getRecord();
             if (!MSDiscItem.Companion.isEmpty(record)) {
@@ -55,7 +36,7 @@ public abstract class MixinWorldRenderer {
                 if (tag == null) return;
                 MSSoundInstance instance = new MSSoundInstance();
                 instance.fromTag(tag);
-                minestudio_playing.put(pos, instance);
+                MineStudio.INSTANCE.getPLAYING_AUDIOS().put(pos, instance);
                 //playMSDisc(instance, pos);
                 ci.cancel();
             }

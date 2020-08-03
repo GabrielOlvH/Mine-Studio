@@ -1,7 +1,7 @@
 package me.steven.minestudio.items
 
 import io.netty.buffer.Unpooled
-import me.steven.minestudio.MineStudioClient
+import me.steven.minestudio.MineStudio
 import me.steven.minestudio.utils.createTestDisc
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.Blocks
@@ -30,7 +30,7 @@ class MSDiscItem(settings: Settings) : Item(settings) {
                 packet.writeCompoundTag(itemStack.orCreateTag)
                 packet.writeString(if (itemStack.hasCustomName()) itemStack.name.asString() else "MineStudio Disc")
                 packet.writeBlockPos(blockPos)
-                ServerSidePacketRegistry.INSTANCE.sendToPlayer(context.player, MineStudioClient.PLAY_DISC_PACKET, packet)
+                ServerSidePacketRegistry.INSTANCE.sendToPlayer(context.player, MineStudio.PLAY_DISC_PACKET, packet)
                 itemStack.decrement(1)
                 context.player?.incrementStat(Stats.PLAY_RECORD)
             }

@@ -2,7 +2,6 @@ package me.steven.minestudio
 
 import me.steven.minestudio.audio.MSSoundInstance
 import me.steven.minestudio.items.MSDiscItem.Companion.isEmpty
-import me.steven.minestudio.utils.identifier
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
@@ -22,7 +21,8 @@ object MineStudioClient : ClientModInitializer {
                 if (instance.isDone()) iterator.remove()
             }
         })
-        ClientSidePacketRegistry.INSTANCE.register(PLAY_DISC_PACKET) { ctx, packet ->
+
+        ClientSidePacketRegistry.INSTANCE.register(MineStudio.PLAY_DISC_PACKET) { ctx, packet ->
             val tag = packet.readCompoundTag() ?: return@register
             val name = packet.readString()
             val pos = packet.readBlockPos()
@@ -37,8 +37,6 @@ object MineStudioClient : ClientModInitializer {
             }
         }
     }
-
-    val PLAY_DISC_PACKET = identifier("play_disc_packet")
 
     val PLAYING_AUDIOS = mutableMapOf<BlockPos, MSSoundInstance>()
 }

@@ -4,7 +4,9 @@ import me.steven.minestudio.MineStudio
 import me.steven.minestudio.audio.MSNote
 import me.steven.minestudio.audio.MSNoteLayer
 import me.steven.minestudio.audio.MSSoundInstance
+import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.minecraft.block.Block
+import net.minecraft.block.Material
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
@@ -25,6 +27,8 @@ fun Identifier.block(block: Block): Identifier {
 }
 
 fun itemSettings(): Item.Settings = Item.Settings().group(MineStudio.MOD_GROUP)
+
+fun blockSettings(material: Material): FabricBlockSettings = FabricBlockSettings.of(material)
 
 fun createTestDisc(): ItemStack {
     val instance = MSSoundInstance()

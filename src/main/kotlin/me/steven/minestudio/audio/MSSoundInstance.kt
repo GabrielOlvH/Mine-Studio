@@ -40,7 +40,7 @@ class MSSoundInstance : NBTSerializable {
             val next = iterator!!.next() as? MSNote ?: continue
             val sound = Registry.SOUND_EVENT.get(next.soundId)
             val pitch = 2.0.pow((next.note - 12) / 12.0).toFloat()
-            world.playSound(pos, sound, SoundCategory.MUSIC, next.volume, pitch, true)
+            world.playSound(pos, sound, SoundCategory.RECORDS, next.volume, pitch, true)
         }
         played = true
     }

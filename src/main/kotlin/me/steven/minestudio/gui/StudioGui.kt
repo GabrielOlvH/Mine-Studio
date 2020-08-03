@@ -20,7 +20,7 @@ class StudioGui : LightweightGuiDescription() {
         rootPanel = panel
         rootPanel.setSize(400, 200)
 
-        workspacePanel.setSize(520, 200)
+        workspacePanel.setSize(520, 180)
 
         panel.add(workspacePanel, 1, 2)
 

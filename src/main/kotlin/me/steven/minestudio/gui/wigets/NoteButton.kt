@@ -16,16 +16,21 @@ import net.minecraft.text.TranslatableText
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-class NoteButton(val sound: SoundEvent) : WButton() {
+class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WButton() {
     var note = 12
     var volume = 1.0f
+
+    override fun setSize(x: Int, y: Int) {
+        this.width = x
+        this.height = y
+    }
 
     override fun paint(matrices: MatrixStack?, x: Int, y: Int, mouseX: Int, mouseY: Int) {
         val percentage = 1f - (note / 24f)
         val red = ((if (percentage > 0.5) 1 - 2 * (percentage - 0.5) else 1.0) * 255).toInt()
         val green = ((if (percentage > 0.5) 1.0 else 2.0 * percentage) * 255).toInt()
         val rgb = red.shl(16).xor(green.shl(8)).xor(0)
-        ScreenDrawing.texturedRect(x, y, width, height, NOTE_TEXTURE, rgb)
+        ScreenDrawing.texturedRect(x, y, 16, 16, NOTE_TEXTURE, rgb)
     }
 
     override fun onMouseScroll(x: Int, y: Int, amount: Double) {
@@ -48,24 +53,25 @@ class NoteButton(val sound: SoundEvent) : WButton() {
     }
 
     override fun onMouseDrag(x: Int, y: Int, button: Int, deltaX: Double, deltaY: Double) {
-        setLocation(this.x + deltaX.toInt(), this.y + deltaY.toInt())
+        setLocation((this.x + deltaX.toInt()).coerceIn(0, workspacePanel.width - width), (this.y + deltaY.toInt()).coerceIn(0, workspacePanel.height - height))
     }
 
     override fun onMouseUp(x: Int, y: Int, button: Int): WWidget {
-        alignNote(this)
+        alignNote()
         return super.onMouseUp(x, y, button)
     }
+
+    private fun alignNote() {
+        val x = (x / width.toDouble()).roundToInt().coerceIn(0, 25)
+        val y = (y / height.toDouble()).roundToInt().coerceIn(0, 4)
+        setLocation(x * width, y * height)
+    }
+
 
     override fun addTooltip(tooltip: MutableList<StringRenderable>?) {
         tooltip?.add(TranslatableText("gui.minestudio.sound", TranslatableText(sound.id.path)))
         tooltip?.add(TranslatableText("gui.minestudio.pitch", LiteralText(note.toString())))
         tooltip?.add(TranslatableText("gui.minestudio.volume", LiteralText(volume.toString())))
-    }
-
-    private fun alignNote(noteButton: NoteButton) {
-        val x = (noteButton.x / width.toDouble()).roundToInt().coerceIn(0, 9)
-        val y = (noteButton.y / height.toDouble()).roundToInt().coerceIn(0, 4)
-        noteButton.setLocation(x * 16, y * 16)
     }
 
     companion object {

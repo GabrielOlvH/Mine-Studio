@@ -20,8 +20,9 @@ class InstrumentButton(private val instrument: Instrument, private val gui: Stud
     override fun onClick(x: Int, y: Int, button: Int) {
         super.onClick(x, y, button)
         MinecraftClient.getInstance().soundManager.play(PositionedSoundInstance.music(instrument.sound))
-        val noteButton = NoteButton(instrument.sound)
+        val noteButton = NoteButton(instrument.sound, gui.workspacePanel)
         gui.noteButtons.add(noteButton)
         gui.workspacePanel.add(noteButton, 0, 0)
+        noteButton.setSize(gui.workspacePanel.width / 25, gui.workspacePanel.height / 5)
     }
 }

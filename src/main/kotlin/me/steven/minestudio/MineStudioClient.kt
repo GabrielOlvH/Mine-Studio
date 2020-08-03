@@ -18,7 +18,7 @@ object MineStudioClient : ClientModInitializer {
                 val instance = entry.value
                 val pos = entry.key
                 instance.tick()
-                if (instance.shouldPlay()) instance.play(pos, world)
+                if (!instance.played) instance.play(pos, world)
                 if (instance.isDone()) iterator.remove()
             }
         })

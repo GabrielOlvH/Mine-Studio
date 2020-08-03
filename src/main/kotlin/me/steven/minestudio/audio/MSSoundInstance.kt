@@ -18,23 +18,11 @@ class MSSoundInstance : NBTSerializable {
 
     val instruction: DefaultedList<MSNoteLayer> = DefaultedList.ofSize(100, MSNoteLayer())
     var delay: Int = 0
+    var played = false
     private var currentDelay = 0
-    private var played = false
     private var soundId: Identifier = SoundManager.MISSING_SOUND.identifier
     private var currentIndex: Int = 0
     private var iterator: Iterator<MSPlayable>? = null
-
-    @Environment(EnvType.CLIENT)
-    fun play(pos: BlockPos, world: ClientWorld) {
-        while (iterator?.hasNext() ?: return) {
-            val next = iterator!!.next() as? MSNote ?: continue
-            val sound = Registry.SOUND_EVENT.get(next.soundId)
-            val pitch = 2.0.pow((next.note - 12) / 12.0).toFloat()
-            world.playSound(pos, sound, SoundCategory.MUSIC, next.volume, pitch, true)
-        }
-        played = true
-    }
-    fun isDone(): Boolean = currentIndex >= instruction.size
 
     fun tick() {
         currentDelay++
@@ -46,7 +34,18 @@ class MSSoundInstance : NBTSerializable {
         }
     }
 
-    fun shouldPlay(): Boolean = !played
+    @Environment(EnvType.CLIENT)
+    fun play(pos: BlockPos, world: ClientWorld) {
+        while (iterator?.hasNext() ?: return) {
+            val next = iterator!!.next() as? MSNote ?: continue
+            val sound = Registry.SOUND_EVENT.get(next.soundId)
+            val pitch = 2.0.pow((next.note - 12) / 12.0).toFloat()
+            world.playSound(pos, sound, SoundCategory.MUSIC, next.volume, pitch, true)
+        }
+        played = true
+    }
+
+    fun isDone(): Boolean = currentIndex >= instruction.size
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         val instruct = CompoundTag()

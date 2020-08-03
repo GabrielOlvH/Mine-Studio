@@ -22,6 +22,12 @@
         "adapter": "kotlin",
         "value": "me.steven.minestudio.MineStudio"
       }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "me.steven.minestudio.MineStudioClient"
+      }
     ]
   },
   "mixins": [

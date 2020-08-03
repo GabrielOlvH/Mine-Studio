@@ -1,10 +1,12 @@
 package me.steven.minestudio.audio
 
 import me.steven.minestudio.utils.NBTSerializable
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.client.sound.SoundManager
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
-import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.util.collection.DefaultedList
@@ -22,12 +24,13 @@ class MSSoundInstance : NBTSerializable {
     private var currentIndex: Int = 0
     private var iterator: Iterator<MSPlayable>? = null
 
-    fun play(pos: BlockPos, world: ServerWorld) {
+    @Environment(EnvType.CLIENT)
+    fun play(pos: BlockPos, world: ClientWorld) {
         while (iterator?.hasNext() ?: return) {
             val next = iterator!!.next() as? MSNote ?: continue
             val sound = Registry.SOUND_EVENT.get(next.soundId)
             val pitch = 2.0.pow((next.note - 12) / 12.0).toFloat()
-            world.playSound(null, pos, sound, SoundCategory.MUSIC, next.volume, pitch)
+            world.playSound(pos, sound, SoundCategory.MUSIC, next.volume, pitch, true)
         }
         played = true
     }
@@ -55,7 +58,6 @@ class MSSoundInstance : NBTSerializable {
         }
         instruct.put("layers", layers)
         instruct.putInt("tempo", delay)
-        //instruct.putInt("current", currentIndex)
         tag.put("minestudio", instruct)
         return tag
     }
@@ -70,7 +72,6 @@ class MSSoundInstance : NBTSerializable {
             instruction[index] = layer
         }
         delay = instruct.getInt("tempo")
-        //currentIndex = instruct.getInt("current")
     }
 
     override fun toString(): String = "SoundInstance[$soundId]"

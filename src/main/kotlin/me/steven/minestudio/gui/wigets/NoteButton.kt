@@ -30,7 +30,7 @@ class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WB
         val red = ((if (percentage > 0.5) 1 - 2 * (percentage - 0.5) else 1.0) * 255).toInt()
         val green = ((if (percentage > 0.5) 1.0 else 2.0 * percentage) * 255).toInt()
         val rgb = red.shl(16).xor(green.shl(8)).xor(0)
-        ScreenDrawing.texturedRect(x, y, 16, 16, NOTE_TEXTURE, rgb)
+        ScreenDrawing.texturedRect(x + (width / 4), y + (height / 4), 16, 16, NOTE_TEXTURE, rgb)
     }
 
     override fun onMouseScroll(x: Int, y: Int, amount: Double) {

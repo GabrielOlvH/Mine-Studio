@@ -32,7 +32,7 @@ class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WB
         val rgb = red.shl(16).xor(green.shl(8)).xor(0)
         ScreenDrawing.texturedRect(x + (width / 4), y + (height / 4), 16, 16, NOTE_TEXTURE, rgb)
         if (this.x !in -16..workspacePanel.width || this.y !in -16..workspacePanel.height)
-            ScreenDrawing.texturedRect(x - 8, y + 8, 16, 16, TRASH_TEXTURE, rgb)
+            ScreenDrawing.texturedRect(x - 8, y + 8, 16, 16, TRASH_TEXTURE, -1)
     }
 
     override fun onMouseScroll(x: Int, y: Int, amount: Double) {

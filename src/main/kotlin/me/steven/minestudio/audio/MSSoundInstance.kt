@@ -1,6 +1,5 @@
 package me.steven.minestudio.audio
 
-import me.steven.minestudio.utils.NBTSerializable
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.sound.SoundManager
@@ -14,7 +13,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.registry.Registry
 import kotlin.math.pow
 
-class MSSoundInstance : NBTSerializable {
+class MSSoundInstance {
 
     val instruction: DefaultedList<MSNoteLayer> = DefaultedList.ofSize(50, MSNoteLayer())
     var delay: Int = 0
@@ -47,7 +46,7 @@ class MSSoundInstance : NBTSerializable {
 
     fun isDone(): Boolean = currentIndex >= instruction.size
 
-    override fun toTag(tag: CompoundTag): CompoundTag {
+    fun toTag(tag: CompoundTag): CompoundTag {
         val instruct = CompoundTag()
         val layers = ListTag()
         instruction.forEachIndexed { index, layer ->
@@ -61,7 +60,7 @@ class MSSoundInstance : NBTSerializable {
         return tag
     }
 
-    override fun fromTag(tag: CompoundTag) {
+    fun fromTag(tag: CompoundTag) {
         val instruct = tag.getCompound("minestudio")
         val layers = instruct.getList("layers", 10)
         layers.forEach { layerTag ->

@@ -1,12 +1,11 @@
 package me.steven.minestudio.audio
 
-import me.steven.minestudio.utils.NBTSerializable
 import net.minecraft.nbt.CompoundTag
 
-interface MSPlayable : NBTSerializable {
-    override fun fromTag(tag: CompoundTag) {}
+interface MSPlayable {
+    fun fromTag(tag: CompoundTag) {}
 
-    override fun toTag(tag: CompoundTag): CompoundTag = tag
+    fun toTag(tag: CompoundTag): CompoundTag = tag
 
     fun isEmpty() = this == MSNote.EMPTY
 

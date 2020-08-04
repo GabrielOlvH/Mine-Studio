@@ -1,6 +1,5 @@
 package me.steven.minestudio.audio
 
-import me.steven.minestudio.utils.NBTSerializable
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.Identifier
 
@@ -8,7 +7,7 @@ data class MSNote(
     var soundId: Identifier? = null,
     var note: Int = 0,
     var volume: Float = 0f
-) : NBTSerializable, MSPlayable {
+) : MSPlayable {
 
     override fun fromTag(tag: CompoundTag) {
         soundId = Identifier(tag.getString("soundId"))

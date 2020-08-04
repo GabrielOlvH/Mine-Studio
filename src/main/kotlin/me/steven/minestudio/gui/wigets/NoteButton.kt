@@ -31,6 +31,8 @@ class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WB
         val green = ((if (percentage > 0.5) 1.0 else 2.0 * percentage) * 255).toInt()
         val rgb = red.shl(16).xor(green.shl(8)).xor(0)
         ScreenDrawing.texturedRect(x + (width / 4), y + (height / 4), 16, 16, NOTE_TEXTURE, rgb)
+        if (this.x !in -16..workspacePanel.width || this.y !in -16..workspacePanel.height)
+            ScreenDrawing.texturedRect(x - 8, y + 8, 16, 16, TRASH_TEXTURE, rgb)
     }
 
     override fun onMouseScroll(x: Int, y: Int, amount: Double) {
@@ -59,7 +61,7 @@ class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WB
     }
 
     override fun onMouseUp(x: Int, y: Int, button: Int): WWidget {
-        if (this.x !in 0..workspacePanel.width || this.y !in 0..workspacePanel.height)
+        if (this.x !in -16..workspacePanel.width || this.y !in -16..workspacePanel.height)
             workspacePanel.remove(this)
         else
             alignNote()
@@ -81,5 +83,6 @@ class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WB
 
     companion object {
         val NOTE_TEXTURE = identifier("textures/gui/musical_note.png")
+        val TRASH_TEXTURE = identifier("textures/gui/trash.png")
     }
 }

@@ -53,11 +53,16 @@ class NoteButton(val sound: SoundEvent, val workspacePanel: WorkspacePanel) : WB
     }
 
     override fun onMouseDrag(x: Int, y: Int, button: Int, deltaX: Double, deltaY: Double) {
-        setLocation((this.x + deltaX.toInt()).coerceIn(0, workspacePanel.width - width), (this.y + deltaY.toInt()).coerceIn(0, workspacePanel.height - height))
+        val newX = (this.x + deltaX.toInt())
+        val newY = (this.y + deltaY.toInt())
+        setLocation(newX, newY)
     }
 
     override fun onMouseUp(x: Int, y: Int, button: Int): WWidget {
-        alignNote()
+        if (this.x !in 0..workspacePanel.width || this.y !in 0..workspacePanel.height)
+            workspacePanel.remove(this)
+        else
+            alignNote()
         return super.onMouseUp(x, y, button)
     }
 

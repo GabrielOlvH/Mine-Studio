@@ -1,5 +1,6 @@
 {
   "gui.minestudio.sound": "Sound: %s",
   "gui.minestudio.pitch": "Pitch: %s",
-  "gui.minestudio.volume": "Volume: %s"
+  "gui.minestudio.volume": "Volume: %s",
+  "gui.minestudio.studio": "Studio"
 }

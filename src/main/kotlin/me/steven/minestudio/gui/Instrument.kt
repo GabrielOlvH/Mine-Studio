@@ -1,10 +1,12 @@
 package me.steven.minestudio.gui
 
+import me.steven.minestudio.utils.identifier
 import net.minecraft.sound.SoundEvent
 import net.minecraft.sound.SoundEvents.*
+import net.minecraft.util.Identifier
 
-enum class Instrument(val sound: SoundEvent) {
-    BANJO(BLOCK_NOTE_BLOCK_BANJO),
+enum class Instrument(val sound: SoundEvent, val iconIdentifier: Identifier? = null) {
+    BANJO(BLOCK_NOTE_BLOCK_BANJO, identifier("textures/instruments/banjo.png")),
     BASS(BLOCK_NOTE_BLOCK_BASS),
     BELL(BLOCK_NOTE_BLOCK_BELL),
     BASEDRUM(BLOCK_NOTE_BLOCK_BASEDRUM),

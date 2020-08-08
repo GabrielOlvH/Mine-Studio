@@ -35,6 +35,7 @@ class StudioGui : LightweightGuiDescription() {
         Instrument.values().forEachIndexed { index, instrument ->
             val button = InstrumentButton(instrument, this)
             panel.add(button, index * 2, 1)
+            button.setSize(32, 32)
         }
 
         rootPanel.validate(this)
